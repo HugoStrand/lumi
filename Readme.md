@@ -59,6 +59,7 @@ CXX=CC CC=cc cmake \
   -DCMAKE_CXX_FLAGS="-static-libstdc++ -O3 -march=znver2 -mtune=znver2 -mfma -mavx2 -m3dnow -fomit-frame-pointer" \
   ..
 ```
+(Todo: Tune the optimization parameters for Lumi zen3 cpus above.)
 
 Compile in parallell
 ```bash
