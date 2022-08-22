@@ -4,7 +4,7 @@
 
 ## Example job-script
 
-'''
+```bash
 #!/bin/bash -l
 #SBATCH --job-name=test-job
 #SBATCH --account=project_465000175
@@ -17,4 +17,4 @@
 export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
 
 srun hostname
-'''
+```
