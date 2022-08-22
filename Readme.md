@@ -49,7 +49,28 @@ pip install --user h5py
 pip install --user mako
 ```
 
-## Triqs CMake command
+## Triqs build
+
+```
+git clone https://github.com/TRIQS/triqs.git
+
+```
+
+Make a manual edit of the triqs python module that tries to detect mpi environment
+```bash
+diff --git a/python/triqs/utility/mpi.py.in b/python/triqs/utility/mpi.py.in
+index d9320ace..867106cb 100644
+--- a/python/triqs/utility/mpi.py.in
++++ b/python/triqs/utility/mpi.py.in
+@@ -41,6 +41,8 @@ def check_for_mpi():
+     # for MPICH and intel based MPI:
+     elif os.environ.get('PMI_RANK'):
+         is_mpi = True
++    elif os.environ.get('SLURM_MPI_TYPE'):
++        is_mpi = True
+     else:
+         print('Warning: could not identify MPI environment!')
+```
 
 Generate make files using `cmake`
 ```bash
