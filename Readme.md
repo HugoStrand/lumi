@@ -1,4 +1,4 @@
-# Lumi notes
+# Lumi Installation Notes
 
 - https://docs.lumi-supercomputer.eu/
 
@@ -40,7 +40,9 @@ hustrand@uan03:~/dev/triqs/build> python -c "import mpi4py; print(mpi4py.__file_
 /opt/cray/pe/python/3.9.12.1/lib/python3.9/site-packages/mpi4py/__init__.py
 ```
 
-## Extra packages for Triqs
+# Install TRIQS
+
+## Install extra Python packages
 
 Need to install some python modules by hand
 
@@ -49,28 +51,30 @@ pip install --user h5py
 pip install --user mako
 ```
 
-## Triqs build
+## Clone GitHub repository
 
 ```
 git clone https://github.com/TRIQS/triqs.git
 
 ```
 
-Make a manual edit of the triqs python module that tries to detect mpi environment
+NB! Make a manual edit of the triqs python module that tries to detect mpi environment
 ```bash
 diff --git a/python/triqs/utility/mpi.py.in b/python/triqs/utility/mpi.py.in
-index d9320ace..867106cb 100644
+index d9320ace..6bd4e271 100644
 --- a/python/triqs/utility/mpi.py.in
 +++ b/python/triqs/utility/mpi.py.in
 @@ -41,6 +41,8 @@ def check_for_mpi():
      # for MPICH and intel based MPI:
      elif os.environ.get('PMI_RANK'):
          is_mpi = True
-+    elif os.environ.get('SLURM_MPI_TYPE'):
++    elif os.environ.get('CRAY_MPICH_VERSION'):
 +        is_mpi = True
      else:
          print('Warning: could not identify MPI environment!')
 ```
+
+## CMake
 
 Generate make files using `cmake`
 ```bash
@@ -82,17 +86,14 @@ CXX=CC CC=cc cmake \
 ```
 (Todo: Tune the optimization parameters for Lumi zen3 cpus above.)
 
+## Build
+
 Compile in parallell
 ```bash
 make -j 128
 ```
 
-Setup environment variables for Triqs using:
-```
-source /users/hustrand/apps/triqs/share/triqs/triqsvars.sh
-```
-
-## Triqs test
+## Test
 
 The Triqs test suite can be run from the login node by starting an interactive jobsession
 ```bash
@@ -329,4 +330,66 @@ Total Test time (real) =   0.72 sec
 The following tests FAILED:
 	172 - different_moves_mc_np2 (Failed)
 Errors while running CTest
+```
+
+## Production
+
+Setup environment variables for Triqs using:
+```
+source /users/hustrand/apps/triqs/share/triqs/triqsvars.sh
+```
+
+To test that the environment is actually working use
+```
+python -c "import triqs; print(triqs.__file__)"
+```
+
+# Install TRIQS/cthyb
+
+## Clone the GitHub repository
+```
+git clone https://github.com/TRIQS/cthyb.git
+```
+
+## CMake command
+
+```bash
+CXX=CC CC=cc cmake \
+  -DCMAKE_INSTALL_PREFIX=$HOME/apps/cthyb \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DCMAKE_CXX_FLAGS="-static-libstdc++ -O3 -march=znver2 -mtune=znver2 -mfma -mavx2 -m3dnow -fomit-frame-pointer" \
+  ..
+```
+
+## Build
+```
+make -j 64
+```
+
+## Test
+
+Standing in the cmake build directory, the `cthyb` test suite can be run from the login node by starting an interactive jobsession
+```bash
+salloc --nodes=1 --partition=standard --account=project_465000175 --time=00:30:00
+ctest -j 64
+```
+
+Here all test passes
+```
+...
+100% tests passed, 0 tests failed out of 26
+
+Total Test time (real) =  20.68 sec
+```
+
+## Usage
+
+Before using in production, make sure to source the cthyb environment variables before running
+```
+source /users/hustrand/apps/cthyb/share/triqs_cthyb/triqs_cthybvars.sh
+```
+
+To test that the environment is actually working use
+```
+python -c "import triqs_cthyb; print(triqs_cthyb.__file__)"
 ```
