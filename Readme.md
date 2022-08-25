@@ -277,7 +277,7 @@ git clone https://github.com/HugoStrand/pyrspt.git
 
 ## Setup environment
 
-Add to `~/.profile
+Add to `~/.profile`
 ```
 export PYTHONPATH=$HOME/dev/pyrspt/:$PYTHONPATH
 export RSPT_BIN=$HOME/dev/rspt/bin
@@ -347,4 +347,18 @@ E = -6585.641697576646 eV, ef = 8.56671393239479 eV
 Ran 2 tests in 50.262s
 
 FAILED (failures=2)
+```
+
+## Production
+
+In the job script set the environment variables according to the wanted MPI parallelization
+
+```
+...
+
+export RSPT_NK=12
+export RSPT_NB=2
+export RSPT_CMD="srun rspt"
+
+python your_pyrspt_calculation_script.py
 ```
