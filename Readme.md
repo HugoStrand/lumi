@@ -349,6 +349,95 @@ Ran 2 tests in 50.262s
 FAILED (failures=2)
 ```
 
+The input files only differ in the choice of `lengthscale` vs. `latticevectors`
+```
+hustrand@uan04:~/dev/pyrspt/pyrspt/test> cat rspt_calc_Al_2022-08-25_18\:55\:*/sym/symt.inp
+########################################################################
+#
+# RSPt symt.inp file generated using ASE 3.22.1 and the Atoms object
+# 
+# {'cell': array([[0.     , 2.03625, 2.03625],
+#       [2.03625, 0.     , 2.03625],
+#       [2.03625, 2.03625, 0.     ]]),
+# 'numbers': array([13]),
+# 'pbc': array([ True,  True,  True]),
+# 'positions': array([[0., 0., 0.]])}
+#
+# Unit cell volume: 16.88586401953125 A^3 = 113.95145885323446 a_0^3
+#
+########################################################################
+
+lengthscale
+  4.8481192814688034 
+
+latticevectors
+   0.0000000000000000  0.7937005259840997  0.7937005259840997 
+   0.7937005259840997  0.0000000000000000  0.7937005259840997 
+   0.7937005259840997  0.7937005259840997  0.0000000000000000  
+
+atoms
+1
+  0.0000000000000000  0.0000000000000000 -0.0000000000000000  13  l     a   # Al 
+
+spinaxis
+ 0 0 0  c
+
+########################################################################
+#
+# RSPt symt.inp file generated using ASE 3.22.1 and the Atoms object
+# 
+# {'cell': array([[0.     , 2.03625, 2.03625],
+#       [2.03625, 0.     , 2.03625],
+#       [2.03625, 2.03625, 0.     ]]),
+# 'numbers': array([13]),
+# 'pbc': array([ True,  True,  True]),
+# 'positions': array([[0., 0., 0.]])}
+#
+# Unit cell volume: 16.88586401953125 A^3 = 113.95145885323446 a_0^3
+#
+########################################################################
+
+lengthscale
+  3.8479548237354453 
+
+latticevectors
+   0.0000000000000000  1.0000000000000000  1.0000000000000000 
+   1.0000000000000000  0.0000000000000000  1.0000000000000000 
+   1.0000000000000000  1.0000000000000000  0.0000000000000000  
+
+atoms
+1
+  0.0000000000000000  0.0000000000000000 -0.0000000000000000  13  l     a   # Al 
+
+spinaxis
+ 0 0 0  c
+
+```
+
+The problem is in how `bz/cub.inp` is generated
+
+```
+hustrand@uan04:~/dev/pyrspt/pyrspt/test> cat rspt_calc_Al_2022-08-25_18\:55\:*/bz/cub.inp 
+# R
+  .000000000000000  .793700525984099  .793700525984099
+  .793700525984099  .000000000000000  .793700525984099
+  .793700525984099  .793700525984099  .000000000000000
+# M
+     0     4     4
+     4     0     4
+     4     4     0
+# R
+  .000000000000000  1.00000000000000  1.00000000000000
+  1.00000000000000  .000000000000000  1.00000000000000
+  1.00000000000000  1.00000000000000  .000000000000000
+# M
+     0     1     1
+     1     0     1
+     1     1     0
+```
+
+Testing to rebase `dev_extsol` on current `master`... Seems to work
+
 ## Production
 
 In the job script set the environment variables according to the wanted MPI parallelization
@@ -362,3 +451,4 @@ export RSPT_CMD="srun rspt"
 
 python your_pyrspt_calculation_script.py
 ```
+
