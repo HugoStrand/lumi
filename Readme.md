@@ -53,7 +53,7 @@ pip install --user mako
 
 ## Clone GitHub repository
 
-Note, using special branch with fixes for `cray-mpich`. (This pull request might eventually be merged with the `3.1.x` branch.)
+Note, using special branch with fixes for `cray-mpich`. ([This pull request](https://github.com/TRIQS/triqs/pull/857) might eventually be merged with the `3.1.x` branch.)
 ```
 git clone https://github.com/TRIQS/triqs.git --branch prq_cray_mpich_support
 ```
@@ -76,6 +76,8 @@ Remove default `TRIQS/mpi` source `deps/mpi_src` downloaded by `cmake` with the 
 rm -rf deps/mpi_src
 git clone  https://github.com/TRIQS/mpi.git --branch prq_cray_mpich_support deps/mpi_src
 ```
+
+For details see [this pull request](https://github.com/TRIQS/mpi/pull/10).
 
 ## Build
 
