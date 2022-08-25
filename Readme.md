@@ -436,7 +436,11 @@ hustrand@uan04:~/dev/pyrspt/pyrspt/test> cat rspt_calc_Al_2022-08-25_18\:55\:*/b
      1     1     0
 ```
 
-Testing to rebase `dev_extsol` on current `master`... Seems to work
+### WIP
+
+- Testing to rebase `dev_extsol` on current `master`... Seems to work!
+
+- Changing back to `-Ofast` optimization to see if the `symt` problem went away.
 
 ## Production
 
