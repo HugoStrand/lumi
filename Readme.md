@@ -183,3 +183,168 @@ To test that the environment is actually working use
 ```
 python -c "import triqs_cthyb; print(triqs_cthyb.__file__)"
 ```
+
+# RSPt (with linking to `rspt_extsol`)
+
+## Clone the GitHub repositories
+
+```
+cd ~/dev
+git clone https://github.com/HugoStrand/rspt_extsol.git
+git clone git@github.com:uumaterialstheory/rspt.git --branch dev_extsol
+```
+
+## Configure and build `rspt_extsol`
+
+```
+cd ~/dev/rspt_extsol
+mkdir build
+cd build
+CXX=CC CC=cc cmake \
+  -DCMAKE_CXX_FLAGS="-static-libstdc++" \
+  ..
+make
+```
+
+## `RSPTmake.inc`
+
+Replace `/users/hustrand` with `$HOME`
+```
+#
+# Cray/HPE PrgEnv-gcc @ LUMI 22.08
+#
+## COMPILERS
+# 
+FHOME            =
+FCOMPILER        = ftn -std=legacy
+#FCOMPILERFLAGS   = -Ofast -funroll-loops -ffree-line-length-0
+FCOMPILERFLAGS   = -O2 -ffree-line-length-0
+FCPPFLAGS        = -DMPI -DNOMPIMOD -DEXTERNAL_CTHYB
+FTARGETARCH      =
+FORTRANLIBS      = \
+-static-libstdc++ \
+-L/opt/cray/pe/gcc/11.2.0/snos/lib64/ -lgfortran -lmpi -lmpifort \
+-L/opt/cray/pe/hdf5/1.12.1.5/gnu/9.1/lib/ \
+-Wl,-rpath=/opt/cray/pe/hdf5/1.12.1.5/gnu/9.1/lib/ \
+-lhdf5 \
+-L/users/hustrand/dev/rspt_extsol/build/ \
+-Wl,-rpath=/users/hustrand/dev/rspt_extsol/build/ \
+-lrspt_extsol \
+-L/opt/cray/pe/python/3.9.12.1/lib/ \
+-Wl,-rpath=/opt/cray/pe/python/3.9.12.1/lib/ \
+-lpython3.9 
+
+F90COMPILER      = ftn
+F90COMPILERFLAGS = $(FCOMPILERFLAGS) -ffree-form
+# gcc
+CCOMPILER        = cc -static-libstdc++
+#CCOMPILERFLAGS   = -Ofast -funroll-loops 
+CCOMPILERFLAGS   = -O2
+CTARGETARCH      = 
+CPPFLAGS         = -DMPI
+CLOADER          = 
+
+## LIBRARIES AND INCLUDE DIRECTORIES
+LAPACKLIB        =
+BLASLIB          =
+FFTWLIB          =
+EXTRALIBS        = -lfftw3 
+INCLUDEDIRS      = 
+
+EXEC             = rspt
+```
+
+## Build
+
+```
+make
+```
+
+# `pyrspt`
+
+## Install additinal Python module `ase`
+
+Install the Atomic Simulation Environment (ASE)
+```
+pip install --user ase
+```
+
+## Clone the GitHub repository
+
+```
+git clone https://github.com/HugoStrand/pyrspt.git
+```
+
+## Setup environment
+
+Add to `~/.profile
+```
+export PYTHONPATH=$HOME/dev/pyrspt/:$PYTHONPATH
+export RSPT_BIN=$HOME/dev/rspt/bin
+export RSPT_NK=1
+export RSPT_NB=1
+export RSPT_CMD="rspt"
+```
+
+## Test
+
+```
+cd ~/dev/pyrspt/pyrspt/test
+nosetests
+```
+
+The Al volume calculation fails with a 5% error in the equilibrium lattice parameter...
+```
+hustrand@uan01:~/dev/pyrspt/pyrspt/test> nosetests
+FF
+======================================================================
+FAIL: test_Al_vol.test_vol
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/opt/cray/pe/python/3.9.12.1/lib/python3.9/site-packages/nose/case.py", line 198, in runTest
+    self.test(*self.arg)
+  File "/pfs/lustrep3/users/hustrand/dev/pyrspt/pyrspt/test/test_Al_vol.py", line 62, in test_vol
+    np.testing.assert_almost_equal(a0, 4.010854032643257, decimal=5)
+  File "/opt/cray/pe/python/3.9.12.1/lib/python3.9/site-packages/numpy/testing/_private/utils.py", line 597, in assert_almost_equal
+    raise AssertionError(_build_err_msg())
+AssertionError: 
+Arrays are not almost equal to 5 decimals
+ ACTUAL: 4.065625144181517
+ DESIRED: 4.010854032643257
+-------------------- >> begin captured stdout << ---------------------
+a = 3.80, E = -6585.952382769626
+a = 3.88, E = -6586.040048099434
+a = 3.96, E = -6586.090516231364
+a = 4.04, E = -6586.110659273062
+a = 4.12, E = -6586.106759719129
+a = 4.20, E = -6586.084856066468
+V_0 = 16.800492365113197 A^3, E_0 = -6586.1117096731205 eV, B = 59.92687653620175 GPa
+a0 = 4.065625144181517
+
+--------------------- >> end captured stdout << ----------------------
+
+======================================================================
+FAIL: test_tetra_fcc_Al_different_lengthscales.test_tetra_fcc_Al_different_lenghtscales
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/opt/cray/pe/python/3.9.12.1/lib/python3.9/site-packages/nose/case.py", line 198, in runTest
+    self.test(*self.arg)
+  File "/pfs/lustrep3/users/hustrand/dev/pyrspt/pyrspt/test/test_tetra_fcc_Al_different_lengthscales.py", line 38, in test_tetra_fcc_Al_different_lenghtscales
+    np.testing.assert_almost_equal(
+  File "/opt/cray/pe/python/3.9.12.1/lib/python3.9/site-packages/numpy/testing/_private/utils.py", line 597, in assert_almost_equal
+    raise AssertionError(_build_err_msg())
+AssertionError: 
+Arrays are not almost equal to 7 decimals
+ ACTUAL: -6585.817597293285
+ DESIRED: -6585.641697576646
+-------------------- >> begin captured stdout << ---------------------
+E = -6585.817597293285 eV, ef = 9.035805147078616 eV
+E = -6585.641697576646 eV, ef = 8.56671393239479 eV
+
+--------------------- >> end captured stdout << ----------------------
+
+----------------------------------------------------------------------
+Ran 2 tests in 50.262s
+
+FAILED (failures=2)
+```
