@@ -208,37 +208,25 @@ make
 
 ## `RSPTmake.inc`
 
-Replace `/users/hustrand` with `$HOME`
+Create the file `RSPTmake.inc` with the contents:
 ```
 #
 # Cray/HPE PrgEnv-gcc @ LUMI 22.08
 #
-## COMPILERS
-# 
+
 FHOME            =
 FCOMPILER        = ftn -std=legacy
-#FCOMPILERFLAGS   = -Ofast -funroll-loops -ffree-line-length-0
 FCOMPILERFLAGS   = -O2 -ffree-line-length-0
 FCPPFLAGS        = -DMPI -DNOMPIMOD -DEXTERNAL_CTHYB
 FTARGETARCH      =
-FORTRANLIBS      = \
--static-libstdc++ \
--L/opt/cray/pe/gcc/11.2.0/snos/lib64/ -lgfortran -lmpi -lmpifort \
--L/opt/cray/pe/hdf5/1.12.1.5/gnu/9.1/lib/ \
--Wl,-rpath=/opt/cray/pe/hdf5/1.12.1.5/gnu/9.1/lib/ \
--lhdf5 \
--L/users/hustrand/dev/rspt_extsol/build/ \
--Wl,-rpath=/users/hustrand/dev/rspt_extsol/build/ \
--lrspt_extsol \
--L/opt/cray/pe/python/3.9.12.1/lib/ \
--Wl,-rpath=/opt/cray/pe/python/3.9.12.1/lib/ \
--lpython3.9 
-
+FORTRANLIBS      = -static-libstdc++ \
+-L/opt/cray/pe/python/3.9.12.1/lib/ -Wl,-rpath=/opt/cray/pe/python/3.9.12.1/lib/ -lpython3.9 \
+-L$(HOME)/dev/rspt_extsol/build/ -Wl,-rpath=$(HOME)/dev/rspt_extsol/build/ -lrspt_extsol
 F90COMPILER      = ftn
 F90COMPILERFLAGS = $(FCOMPILERFLAGS) -ffree-form
+
 # gcc
 CCOMPILER        = cc -static-libstdc++
-#CCOMPILERFLAGS   = -Ofast -funroll-loops 
 CCOMPILERFLAGS   = -O2
 CTARGETARCH      = 
 CPPFLAGS         = -DMPI
@@ -248,7 +236,7 @@ CLOADER          =
 LAPACKLIB        =
 BLASLIB          =
 FFTWLIB          =
-EXTRALIBS        = -lfftw3 
+EXTRALIBS        = -lfftw3 -lmpi -lmpifort 
 INCLUDEDIRS      = 
 
 EXEC             = rspt
