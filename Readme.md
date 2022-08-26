@@ -254,6 +254,8 @@ INCLUDEDIRS      =
 EXEC             = rspt
 ```
 
+Note that using higher optimizations than `-O2` cause RSPt to produce inconsistent results for the `pyrspt` tests below.
+
 ## Build
 
 ```
@@ -264,9 +266,10 @@ make
 
 ## Install additinal Python module `ase`
 
-Install the Atomic Simulation Environment (ASE)
+Install `ase` the Atomic Simulation Environment (ASE) and `pydlr` the Discrete Lehman Representation Python modules.
 ```
 pip install --user ase
+pip install --user pydlr
 ```
 
 ## Clone the GitHub repository
@@ -278,7 +281,7 @@ git clone https://github.com/HugoStrand/pyrspt.git
 ## Setup environment
 
 Add to `~/.profile`
-```
+```bash
 export PYTHONPATH=$HOME/dev/pyrspt/:$PYTHONPATH
 export RSPT_BIN=$HOME/dev/rspt/bin
 export RSPT_NK=1
@@ -288,165 +291,25 @@ export RSPT_CMD="rspt"
 
 ## Test
 
-```
+```bash
 cd ~/dev/pyrspt/pyrspt/test
 nosetests
 ```
 
-The Al volume calculation fails with a 5% error in the equilibrium lattice parameter...
+The test passes
 ```
-hustrand@uan01:~/dev/pyrspt/pyrspt/test> nosetests
-FF
-======================================================================
-FAIL: test_Al_vol.test_vol
+hustrand@uan04:~/dev/pyrspt/pyrspt/test> nosetests
+..
 ----------------------------------------------------------------------
-Traceback (most recent call last):
-  File "/opt/cray/pe/python/3.9.12.1/lib/python3.9/site-packages/nose/case.py", line 198, in runTest
-    self.test(*self.arg)
-  File "/pfs/lustrep3/users/hustrand/dev/pyrspt/pyrspt/test/test_Al_vol.py", line 62, in test_vol
-    np.testing.assert_almost_equal(a0, 4.010854032643257, decimal=5)
-  File "/opt/cray/pe/python/3.9.12.1/lib/python3.9/site-packages/numpy/testing/_private/utils.py", line 597, in assert_almost_equal
-    raise AssertionError(_build_err_msg())
-AssertionError: 
-Arrays are not almost equal to 5 decimals
- ACTUAL: 4.065625144181517
- DESIRED: 4.010854032643257
--------------------- >> begin captured stdout << ---------------------
-a = 3.80, E = -6585.952382769626
-a = 3.88, E = -6586.040048099434
-a = 3.96, E = -6586.090516231364
-a = 4.04, E = -6586.110659273062
-a = 4.12, E = -6586.106759719129
-a = 4.20, E = -6586.084856066468
-V_0 = 16.800492365113197 A^3, E_0 = -6586.1117096731205 eV, B = 59.92687653620175 GPa
-a0 = 4.065625144181517
+Ran 2 tests in 53.404s
 
---------------------- >> end captured stdout << ----------------------
-
-======================================================================
-FAIL: test_tetra_fcc_Al_different_lengthscales.test_tetra_fcc_Al_different_lenghtscales
-----------------------------------------------------------------------
-Traceback (most recent call last):
-  File "/opt/cray/pe/python/3.9.12.1/lib/python3.9/site-packages/nose/case.py", line 198, in runTest
-    self.test(*self.arg)
-  File "/pfs/lustrep3/users/hustrand/dev/pyrspt/pyrspt/test/test_tetra_fcc_Al_different_lengthscales.py", line 38, in test_tetra_fcc_Al_different_lenghtscales
-    np.testing.assert_almost_equal(
-  File "/opt/cray/pe/python/3.9.12.1/lib/python3.9/site-packages/numpy/testing/_private/utils.py", line 597, in assert_almost_equal
-    raise AssertionError(_build_err_msg())
-AssertionError: 
-Arrays are not almost equal to 7 decimals
- ACTUAL: -6585.817597293285
- DESIRED: -6585.641697576646
--------------------- >> begin captured stdout << ---------------------
-E = -6585.817597293285 eV, ef = 9.035805147078616 eV
-E = -6585.641697576646 eV, ef = 8.56671393239479 eV
-
---------------------- >> end captured stdout << ----------------------
-
-----------------------------------------------------------------------
-Ran 2 tests in 50.262s
-
-FAILED (failures=2)
+OK
 ```
-
-The input files only differ in the choice of `lengthscale` vs. `latticevectors`
-```
-hustrand@uan04:~/dev/pyrspt/pyrspt/test> cat rspt_calc_Al_2022-08-25_18\:55\:*/sym/symt.inp
-########################################################################
-#
-# RSPt symt.inp file generated using ASE 3.22.1 and the Atoms object
-# 
-# {'cell': array([[0.     , 2.03625, 2.03625],
-#       [2.03625, 0.     , 2.03625],
-#       [2.03625, 2.03625, 0.     ]]),
-# 'numbers': array([13]),
-# 'pbc': array([ True,  True,  True]),
-# 'positions': array([[0., 0., 0.]])}
-#
-# Unit cell volume: 16.88586401953125 A^3 = 113.95145885323446 a_0^3
-#
-########################################################################
-
-lengthscale
-  4.8481192814688034 
-
-latticevectors
-   0.0000000000000000  0.7937005259840997  0.7937005259840997 
-   0.7937005259840997  0.0000000000000000  0.7937005259840997 
-   0.7937005259840997  0.7937005259840997  0.0000000000000000  
-
-atoms
-1
-  0.0000000000000000  0.0000000000000000 -0.0000000000000000  13  l     a   # Al 
-
-spinaxis
- 0 0 0  c
-
-########################################################################
-#
-# RSPt symt.inp file generated using ASE 3.22.1 and the Atoms object
-# 
-# {'cell': array([[0.     , 2.03625, 2.03625],
-#       [2.03625, 0.     , 2.03625],
-#       [2.03625, 2.03625, 0.     ]]),
-# 'numbers': array([13]),
-# 'pbc': array([ True,  True,  True]),
-# 'positions': array([[0., 0., 0.]])}
-#
-# Unit cell volume: 16.88586401953125 A^3 = 113.95145885323446 a_0^3
-#
-########################################################################
-
-lengthscale
-  3.8479548237354453 
-
-latticevectors
-   0.0000000000000000  1.0000000000000000  1.0000000000000000 
-   1.0000000000000000  0.0000000000000000  1.0000000000000000 
-   1.0000000000000000  1.0000000000000000  0.0000000000000000  
-
-atoms
-1
-  0.0000000000000000  0.0000000000000000 -0.0000000000000000  13  l     a   # Al 
-
-spinaxis
- 0 0 0  c
-
-```
-
-The problem is in how `bz/cub.inp` is generated
-
-```
-hustrand@uan04:~/dev/pyrspt/pyrspt/test> cat rspt_calc_Al_2022-08-25_18\:55\:*/bz/cub.inp 
-# R
-  .000000000000000  .793700525984099  .793700525984099
-  .793700525984099  .000000000000000  .793700525984099
-  .793700525984099  .793700525984099  .000000000000000
-# M
-     0     4     4
-     4     0     4
-     4     4     0
-# R
-  .000000000000000  1.00000000000000  1.00000000000000
-  1.00000000000000  .000000000000000  1.00000000000000
-  1.00000000000000  1.00000000000000  .000000000000000
-# M
-     0     1     1
-     1     0     1
-     1     1     0
-```
-
-### WIP
-
-- Testing to rebase `dev_extsol` on current `master`... Seems to work!
-
-- Changing back to `-Ofast` optimization to see if the `symt` problem went away.
 
 ## Production
 
-In the job script set the environment variables according to the wanted MPI parallelization
-
-```
+In the job script set the environment variables according to the wanted MPI parallelization. Note that `RSPT_CMD` has to be changed to `srun rspt`.
+```bash
 ...
 
 export RSPT_NK=12
