@@ -1,15 +1,56 @@
 
+# Building NESSi on LUMI
 
+## Module environment
 
 ```bash
-./> git clone https://github.com/nessi-cntr/nessi.git
-./> cd nessi/libcntr
+ml purge
+ml LUMI/22.08 partition/C
+
+ml cpeGNU
+ml cray-fftw
+ml cray-hdf5
+ml cray-python
+
+ml Boost/1.79.0-cpeGNU-22.08
+ml GMP/6.2.1-cpeGNU-22.08
+ml Eigen/3.4
 ```
+
+```
+~/> ml
+
+Currently Loaded Modules:
+  1) init-lumi/0.1                        (S)  12) cray-mpich/8.1.18         23) ncurses/6.2-cpeGNU-22.08
+  2) ModuleLabel/label                    (S)  13) cray-libsci/22.08.1.1     24) gettext/0.21-cpeGNU-22.08-minimal
+  3) LUMI/22.08                           (S)  14) cray-dsmml/0.2.2          25) XZ/5.2.5-cpeGNU-22.08
+  4) craype-x86-milan                          15) perftools-base/22.06.0    26) lz4/1.9.3-cpeGNU-22.08
+  5) craype-accel-host                         16) cpeGNU/22.08              27) zstd/1.5.2-cpeGNU-22.08
+  6) libfabric/1.15.0.0                        17) cray-fftw/3.3.10.1        28) ICU/71.1-cpeGNU-22.08
+  7) craype-network-ofi                        18) cray-hdf5/1.12.1.5        29) Boost/1.79.0-cpeGNU-22.08
+  8) xpmem/2.4.4-2.3_9.1__gff0e1d9.shasta      19) cray-python/3.9.12.1      30) GMP/6.2.1-cpeGNU-22.08
+  9) partition/C                          (S)  20) bzip2/1.0.8-cpeGNU-22.08  31) Eigen/3.4
+ 10) gcc/11.2.0                                21) zlib/1.2.12-cpeGNU-22.08
+ 11) craype/2.7.17                             22) gzip/1.12-cpeGNU-22.08
+
+  Where:
+   S:  Module is Sticky, requires --force to unload or purge
+```
+
+## Clone NESSi
+
+```bash
+~/> cd dev
+~/dev> git clone https://github.com/nessi-cntr/nessi.git
+~/dev> cd nessi/libcntr
+```
+
+## Fix Eigen3 include path
 
 Fix for relative include pattern of `Eigen3`
 ```
-./nessi/libcntr> mkdir eigen_include
-./nessi/libcntr> ln -s /appl/lumi/SW/LUMI-22.08/common/EB/Eigen/3.4/include eigen_include/eigen3
+~/dev/nessi/libcntr> mkdir eigen_include
+~/dev/nessi/libcntr> ln -s /appl/lumi/SW/LUMI-22.08/common/EB/Eigen/3.4/include eigen_include/eigen3
 ```
 
 Fix for HP/Cray MPICH and Find_MPI of cmake. Edit `./nessi/libcntr/CMakeLists.txt` according to
@@ -29,6 +70,8 @@ index 9b913c7..d12e002 100644
      set(CMAKE_CXX_COMPILE_FLAGS
 ```
 
+## Configure and build NESSi
+
 Command line for `cmake` stored in the file `cmake.sh` (and made executable using `chmod +x cmake.sh`)
 ```
 CC=cc CXX=CC \
@@ -45,13 +88,14 @@ CC=cc CXX=CC \
 ```
 
 ```bash
-./nessi/libcntr> mkdir cbuild
-./nessi/libcntr> cd cbuild
-./nessi/libcntr/cbuild> ../cmake.sh
-./nessi/libcntr/cbuild> make -j 128
-./nessi/libcntr/cbuild> make install
+~/dev/nessi/libcntr> mkdir cbuild
+~/dev/nessi/libcntr> cd cbuild
+~/dev/nessi/libcntr/cbuild> ../cmake.sh
+~/dev/nessi/libcntr/cbuild> make -j 128
+~/dev/nessi/libcntr/cbuild> make install
 ```
 
+## Configure and build NESSi example programs
 
 ```bash
 ./nessi/libcntr/cbuild> cd ../../examples
@@ -71,12 +115,15 @@ CC=cc CXX=CC \
 ```
 
 ```bash
-./nessi/examples> mkdir cbuild
-./nessi/examples/cbuild> ../cmake.sh
-./nessi/examples/cbuild> make -j 128
-./nessi/examples/cbuild> cd ..
+~/dev/nessi/examples> mkdir cbuild
+~/dev/nessi/examples/cbuild> ../cmake.sh
+~/dev/nessi/examples/cbuild> make -j 128
+~/dev/nessi/examples/cbuild> cd ..
 ```
 
+## Setup and run `demo_gw.py`
+
+Add the NESSi python module and the NESSi library to your shell environment
 ```
 export PYTHONPATH=$HOME/dev/nessi/libcntr/python3:$PYTHONPATH
 export LD_LIBRARY_PATH=$HOME/apps/libcntr/lib:$LD_LIBRARY_PATH
@@ -84,8 +131,8 @@ export LD_LIBRARY_PATH=$HOME/apps/libcntr/lib:$LD_LIBRARY_PATH
 
 Change MPI run command from `mpirun` to `srun` in `./nessi/examples/utils/demo_gw.py`
 ```bash
-sed -i bak 's/mpirun/srun/g' ./utils/demo_gw.py
-git diff 
+~/dev/nessi/examples> sed -i bak 's/mpirun/srun/g' ./utils/demo_gw.py
+~/dev/nessi/examples> git diff 
 ```
 
 ```
@@ -102,13 +149,20 @@ index 77d1a65..d4b5f5c 100644
      Run(sysparams,solverparams,file_field,output_file,mpicmd,runpath='./')
 ```
 
+Start an interactive allocation on LUMI
 ```bash
-./nessi/examples> salloc --nodes=1 --ntasks=128 --partition=debug --account=project_465000175 --time=00:05:00
+~/dev/nessi/examples> salloc --nodes=1 --ntasks=128 --partition=debug --account=project_465000175 --time=00:05:00
+
 salloc: Pending job allocation 1748084
 salloc: job 1748084 queued and waiting for resources
 salloc: job 1748084 has been allocated resources
 salloc: Granted job allocation 1748084
-./nessi/examples> python ./utils/demo_gw.py
+```
+
+Run `demo_gw.py`
+```
+~/dev/nessi/examples> python ./utils/demo_gw.py
+
 ************************************************************
    Test program: Hubbard 1d in GW approximation
 ************************************************************
